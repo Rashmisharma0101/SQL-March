@@ -1,0 +1,51 @@
+| customer_id | name | city |
+| ----------- | ---- | ---- |
+| order_id | customer_id | amount |
+| -------- | ----------- | ------ |
+sales
+| order_id | region | amount |
+| -------- | ------ | ------ |
+
+Show customer name and order amount.
+
+select customers.name, orders.amount from
+customers join orders on customers.customer_id = orders.customer_id
+
+Find customers who placed orders above 5000.
+select customers.name, orders.amount from
+customers join orders on customers.customer_id = orders.customer_id
+where orders.amount > 5000
+
+Find customers who never placed any order.
+select customers.name, orders.amount from
+customers left join orders on customers.customer_id = orders.customer_id
+where orders.customer_id is null
+
+Rank orders by amount within each region.
+select orders.order_id, sales.region, orders.amount, 
+dense_rank() over (partition by region order by orders.amount desc) as rn from
+orders join sales on orders.order_id = sales.order_id
+
+Find previous order amount using LAG.
+select orders.order_id, orders.amount, lag(orders.amount) over (order by orders.id) as prev_amount
+from orders
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+Day1
+Show all columns from the employees table.
+select * from employees
+
+Show employees whose salary is greater than 50,000.
+
+select empi_id, salary from employees where salary > 50000
+
+Find the total salary paid in each department.
+
+select dept, sum(salary) as total_salary from employees
+group by dept
+
+Find departments where average salary is greater than 60,000.
+
+select dept, avg(salary) as avg_sal from employees
+group by dept
+having avg(salary) > 60000
+
+Show employees sorted by salary descending.
+
+select emp_name, salary from employee
+order by salary desc

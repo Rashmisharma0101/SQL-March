@@ -68,11 +68,26 @@ from sales
 
 --------------------------------------------------------
 
+# challenge
+Orders
 
+| order_id | customer_id | order_date | amount |
 
+Write a SQL query to find the total amount spent by each customer and return the top 3 customers who spent the most money.
 
+select customer_id, sum(amount) as total_amount from orders
+group by customer_id
+order by total_amount desc
+limit 3
 
+find the top 3 customers in each year.
 
+with cte1 as (select customer_id, year(order_date)  as year, sum(amount) as total_amount
+from orders
+group by customer_id, year(order_date)),
+cte2 as (select year, customer_id, total_amount, dense_rank() over (partition by year order by total_amount desc) as rn
+from cte1)
+select year, customer_id, total_amount from cte2 where rn <= 3
 
 
 

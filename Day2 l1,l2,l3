@@ -1,0 +1,113 @@
+Table: employees
+| emp_id | name | department | salary |
+
+Show name and department of all employees.
+
+select name, department from employees
+
+--------------------------------------------------------
+Find employees whose salary is greater than 60000.
+select name, salary from employees
+where salary > 60000
+
+--------------------------------------------------------
+Find total salary per department.
+select department, sum(salary) as total_salary from employees
+group by department
+
+--------------------------------------------------------
+Find number of employees in each department.
+select department, count(emp_id) as emp_count from employees
+group by department
+
+--------------------------------------------------------
+Show employees sorted by salary (highest first).
+
+select emp_id, name, salary from employees
+order by salary desc
+
+--------------------------------------------------------
+customers
+| customer_id | name | city |
+
+orders
+| order_id | customer_id | amount |
+
+Show customer name and order amount.
+select customers.name, orders.amount
+from customers join orders
+on customers.customer_id = orders.customer_id
+
+--------------------------------------------------------
+Find total order amount per customer.
+
+select customers.name, sum(orders.amount) as total_order
+from customers join orders
+on customers.customer_id = orders.customer_id
+group by customers.name
+
+--------------------------------------------------------
+
+Find customers who never placed any order.
+select customers.customer_id, customers.name
+from customers left join orders
+on customers.customer_id = orders.customer_id
+where orders.customer_id is null
+
+--------------------------------------------------------
+
+Rank orders by amount within each region.
+select order_id, region, amount, dense_rank() over (partition by region order by amount desc) as rn
+from sales
+
+--------------------------------------------------------
+Find running total of sales.
+
+select order_id, region, amount, sum(amount) over (order by order_id) as running_total
+from sales
+
+--------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

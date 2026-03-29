@@ -1,0 +1,59 @@
+# Task: For each customer, find the last 2 orders and the difference from previous order.
+with cte1 as (select orderid, customerid, orderdate, amount, lag(amount) over (partition by customerid order by orderdate
+) as prev_amount from orders),
+cte2 as (select orderid, customerid, orderdate, amount, prev_amount, amount-prev_amount as difference from cte1),
+cte3 as (select orderid, customerid, orderdate, amount, prev_amount, difference, row_number() over (partition by customerid order by orderdate desc)
+as rn from  cte2)
+select * from cte3 where rn <=2
+---------------------------------------------------------------------------------
+# Task: Top 1 product by total revenue per region.
+product_id	region	sales_date	revenue
+
+with cte1 as (select region, productid, sum(revenue) as total from sales group by region, productid),
+cte2 as (select region, productid, total, rank() over (partition by region order by total desc) as rn from cte1)
+select region, productid, total from cte2 where rn = 1
+
+---------------------------------------------------------------------------------
+# Find customers who never placed an order.
+customers and orders tables.
+
+select customers.customerid from customers left join orders
+on customers.customerid = orders.customerid
+where orders.orderid is null
+
+---------------------------------------------------------------------------------
+# Rolling 3-month revenue for each customer
+with cte1 as (select customerid, date_trunc('month', orderdate) as mn, sum(revenue) as total from orders group by customerid, month(orderdate))
+select customerid, total, sum(total) over (partition by customerid order by mn rows between 2 preceding and current row)
+as rolling_sum from cte1 order by customerid, mn
+
+---------------------------------------------------------------------------------
+# Detect duplicate rows using ROW_NUMBER().
+with cte1 as (select orderid, customerid, orderdate, amount, row_number() over (partition by customerid, orderdate, amount order by 
+orderid) as rn from orders)
+select * from cte1 where rn >1
+
+---------------------------------------------------------------------------------
+# Calculate customer churn: customers who didn’t place order in last 3 months.
+with cte1 as( select customerid, max(orderdate) as maxdate from orders group by customerid)
+select * from cte1 where maxdate < currentdate - interval '3 months'
+
+OR 
+below one takes care of customers who never ordered
+
+SELECT c.customerid
+FROM customers c
+LEFT JOIN orders o
+    ON c.customerid = o.customerid
+    AND o.orderdate >= CURRENT_DATE - INTERVAL '3 months'
+WHERE o.customerid IS NULL;
+---------------------------------------------------------------------------------
+# Compare revenue YoY per product using self-join or CTE.
+with cte1 as (select productid, date_trunc('year', orderdate) as yr, sum(revenue) as total from sales group by productid, yr),
+cte2 as (select productid, yr, total, lag(total) over (partition by productid order by yr asc)  as prev_total from cte1)
+select productid, yr, total, coalesce((total-prev_total)* 100.0 /prev_total, 0) as yoypercentage from cte2
+order by productid, yr
+---------------------------------------------------------------------------------------
+
+
+

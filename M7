@@ -1,0 +1,76 @@
+transaction_id	customer_id	product_id	amount	transaction_date	city
+1	101	1	500	2024-01-01	Delhi
+2	102	2	300	2024-01-02	Mumbai
+3	101	3	700	2024-01-03	Delhi
+
+# select city, sum(amount) as total_sales from transactions
+group by city
+
+# select sum(amount) as delhi_sales from transactions
+where city = 'Delhi'
+
+# select customer_id, count(transaction_id) as transaction_count
+from transactions
+group by customer_id
+
+# select transaction_date, sum(amount) over (order by transaction_date rows between unbounded preceding and current row) as running_total
+from trasactions
+
+# select customer_id, total_sales from (select customer_id, sum(amount) as total_sales, 
+dense_rank() over (order by sum(amount) desc) as rn
+from transactions group by customer_id)t
+where rn <= 2
+
+
+# select customer_id, sum(amount) as total_sales, 
+dense_rank() over (order by sum(amount) desc) as rn
+from transactions
+group by customer_id
+
+# select customer_id, count(transaction_id) as trans_count
+from transactions
+group by customer_id
+having count(transaction_id) > 1
+
+# COUNT(*)  counts null also
+COUNT(customer_id) does not count nulls
+
+# select customer_id, transaction_date as first_date from (select customer_id, transaction_date, 
+row_number() over (partition by customer_id order by transaction_date) as rn
+from transactions) t
+where rn = 1
+
+# select customer_id, transaction_id, transaction_date as latest_date from (select customer_id, transaction_id, transaction_date, 
+row_number() over (partition by customer_id order by transaction_date desc) as rn
+from transactions) t
+where rn = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,75 @@
+-- '5,000'
+'12,50,000'
+output
+5000
+1250000
+select regexp_replace(amount, '[^0-9]', '') as cleaned_amount
+from orders
+-----------------------------------------------------------------------------------
+'+91-98765 43210'
+'(987) 654-3210'
+output
+919876543210
+9876543210
+select regexp_replace(phone, '[^0-9]', '') as cleaned_numbers
+from customers
+-----------------------------------------------------------------------------------
+🟡 Problem:
+'user123@gmail.com'
+'test.user@company.com'
+
+➡ Extract:
+
+user123
+test.user
+select regexp_substr(email, '^[^@]+') as user_name
+from users
+
+-----------------------------------------------------------------------------------
+'2024/01/15'
+'2024-01-15'
+
+➡ Convert all / to -
+select regexp_replace(order_date, '/', '-') as cleaned_date from orders 
+-----------------------------------------------------------------------------------
+🟡 Problem:
+'R@shmi#123'
+'Ankit!!
+➡ Convert to:
+Rshmi123
+Ankit
+select regexp_replace(name, '[^a-zA-Z0-9]', '') as cleaned_name from customers
+
+-----------------------------------------------------------------------------------
+Task:
+Remove all non-numeric characters
+👉 Output should be:
+5000
+300
+7500
+
+select regexp_replace(price, '[^0-9.]' , '') as cleaned_prices from products
+-----------------------------------------------------------------------------------
+select regexp_replace(phone , '[^0-9]', '') as cleaned_phonenumbers from users
+-----------------------------------------------------------------------------------
+select regexp_replace(regex_substr(email, '@(.+)$'), '@', '') as user_name from users
+-----------------------------------------------------------------------------------
+select regexp_replace(name, '[^a-zA-Z0-9]', '') as cleaned_names from users
+-----------------------------------------------------------------------------------
+select trim(product_name) as trimmed_name from orders
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

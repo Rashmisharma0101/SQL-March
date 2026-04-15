@@ -1,0 +1,14 @@
+Q1. Remove commas and convert to number
+
+Table: sales
+
+id	amount
+1	5,000
+2	12,300
+
+👉 Convert amount into numeric
+
+select id, cast(replace(amount, ',', '') as int) as cleaned_amount
+from sales
+
+---------------------------------------------------------------------------------------

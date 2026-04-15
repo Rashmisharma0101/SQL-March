@@ -22,6 +22,58 @@ as latest_order from orders) t
 where latest_order = 1
 
 -- Count number of orders per customer
+select customer_id, count(order_id) as order_counts
+from orders
+group by customer_id
+
+-- Top 3 customers by total spend
+select customer_id, sum(amount) as total_spent
+from orders
+group by customer_id
+order by total_spent desc
+limit 3
+
+------------------------------------------------------------------------------------
+-- Find customers who never placed an order
+select customers.customer_id from customers
+left join orders
+on customers.customer_id = orders.customer_id
+where orders.customer_id is null
+
+-- second highest order amount
+select amount from (
+select amount, dense_rank() over (order by amount desc) as rn from orders) t
+where rn = 2
+
+-- running total of orders by date
+select order_id, amount, sum(amount) over (order by order_date rows between unbounded preceding and current row) as running_total
+from orders
+
+-- remove duplicate orders
+delete from orders o using
+(select *, row_number() over (partition by customer_id, amount, order_date order by order_date desc)
+as rn from orders) t
+where o.customer_id = t.customer_id
+and o.amount = t.amount
+and o.order_date = t.order_date
+and t.rn > 1
+
+-- orders in last 30 days
+select * from orders where order_date >= current_date - interval '30 days'
+
+-- Data Validation
+select * from orders where amount is null or order_date is null
+
+-- select date_format(order_date, '%Y-%m-%d') as formatted_date from orders
+
+-- insert into orders(customer_id, amount)
+select cust_id, amt from client_orders
+
+-- case when  regexp '^[0-9]+$' then cast (amount as int) else null end -- to conver 5000 into int
+
+--
+insert into orders(customer_id, amount)
+select cust_id, case when amt < 0 then 0 else amt end  from client_orders
 
 
 
@@ -29,6 +81,57 @@ where latest_order = 1
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+🎯 BONUS (Mini Practical Task)
+
+👉 Try this:
+
+You have a CSV:
+
+Clean it
+Rename columns
+Remove nulls
+Convert to JSON
+
+👉 This = EXACT job simulation
 
 
 

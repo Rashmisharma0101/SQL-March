@@ -1,0 +1,141 @@
+-- Data Cleaning SQL Practice Set
+
+-- find missing values
+select * from orders where amount is null or order_date is null
+
+-- Replace NULL amount with 0
+select order_id, case when amount is null then 0 else amount end as amount
+from orders
+
+-- Remove extra spaces from customer_name
+select trim(customer_name) as trimmed_customer_names
+from customers
+
+update customers
+set customer_name = lower(customer_name)
+
+
+-- Convert all email values to lowercase
+select lower(email) as lowered_email from customers
+
+update customers
+set email = lower(email)
+
+-- Remove duplicate rows based on:
+customer_id, order_date
+
+delete from orders using
+(select customer_id, order_date, row_number() over (partition by customer_id, order_date order by order_date) 
+as rn from orders) t
+where t.customer_id = orders.customer_id
+and t.order_date = orders.order_date
+and t.rn > 1
+
+-- Fix Date Format
+select order_date, 
+date_format(order_date, '%Y-%m-%d') as formatted_date from orders
+
+-- Extract Clean Numbers
+select regexp_replace(amount, '^[0-9]', '') as clean_amount from orders
+
+-- Find rows where:
+amount contains text like "five thousand"
+select * from ordes where amount not regexp '^[0-9]+$'
+
+--Column status has:
+"delivered", "Delivered", "DELIVERED"
+
+update orders
+set status = lower(status)
+
+-- Remove Leading Zeros
+update orders
+set amount = cast(amount as int)
+where amount regexp '^[0-9]+$'
+
+generally make separate column
+alter table orders add clean_amount int
+
+update orders
+set clean_amount = amount - 100
+--------------------------------------------------------------------------------
+select amount, case when amount regexp '^[0-9]+$' then cast (amount as int)
+else null end as clean_amount
+from orders
+
+--
+select case
+when order_date like '%-%' then str_to_date(order_date, '%Y-%m-%d')
+when order_date like '%/%' then str_to_date(order_date, '%Y-%m-%d')
+when order_date like '%.%' then str_to_date(order_date, '%Y-%m-%d')
+else Null
+end as clean_date from orders
+
+
+-- detect duplicate transactions
+select cstomer_id, order_date, amount, count(*)
+from orders
+group by cstomer_id, order_date, amount
+having count(*) > 1
+
+-- keep latest record
+with cte1 as(
+select ctid, row_number() over (partition by customer_id, order_id order by order_date desc)
+as rn
+from orders)
+delete from orders where ctid in (select ctid from cte1 where rn > 1)
+# ctid is a PostgreSQL system column that uniquely identifies the physical row location. 
+# I use it for safe deletion of duplicates when no primary key is available.
+
+-- select full_name, substring_index(full_name, ' ', 1) as first_name,
+substring_index(full_name, ' ', -1) as last_name
+from customers
+
+-- select case when lower(city) in ('ny', 'new york', newyork') then 'New York' 
+else city end as cleaned_city
+from customers
+
+-- select * from orders where amount > 1000000
+
+-- replace future dates with null
+update orders
+set order_date = Null
+where order_date > current_date
+
+-- select cust_id as customer_id,
+amt as amount
+from orders
+
+-- create table errortable as
+select * from orders
+where order_date> current_date or order_date is null
+
+if error table already exists
+
+insert into errortable(customer_id, order_id, amount, order_date, error_reason)
+select customer_id, order_id, amount, order_date, 
+case when order_date > current_date then 'future_date'
+when order_date is null then 'Missing date'
+end as error_reason
+from orders
+where order_date > current_date
+or order_date is null
+-------------------------------------------------------------------------------------
+
+supplier   amount            date
+ABC        5000              10/04/26
+XYZ        five thousand     11-04-2026
+PQR        ₹3000             NULL
+
+select supplier,
+case when amount regexp '[0-9]' then cast (regexp_replace(amount, '[0-9]', '') as int)
+else  null
+end as cleaned_amount,
+case when date like '%/%' then str_to_date(date, '%Y-%m-%d')
+when date like '%-%' then str_to_date(date, '%Y-%m-%d')
+else null
+end as 
+from client_data
+
+
+

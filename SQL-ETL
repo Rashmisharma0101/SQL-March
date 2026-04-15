@@ -1,0 +1,45 @@
+orders
+order_id	customer_id	order_date	amount
+
+customers
+| customer_id | customer_name | city |
+
+--Total spend per customer
+select customer_id, sum(amount) as total_spent
+from orders
+group by customer_id
+
+-- Customers who spent more than 10,000
+select customer_id, sum(amount) as total_spent
+from orders
+group by customer_id
+having sum(amount) > 10000
+
+-- Latest order per customer
+select customer_id, order_id, amount, order_date from (
+select customer_id, order_id, amount, order_date, row_number() over (partition by customer_id order by order_date desc)
+as latest_order from orders) t
+where latest_order = 1
+
+-- Count number of orders per customer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

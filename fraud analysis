@@ -1,0 +1,58 @@
+Table: tns
+txn_id	user_id	txn_date	amount	merchant	category	payment_mode	location	device	is_fraud
+1. select count(txn_id) as transaction_count from tns
+2. select sum(is_fraud) as total_fraud_trns  from tns
+3. select distinct payment_mode from tns
+4. select avg(amount) as avg_trns_amount from tns
+5. select * from tns where amount > 50000
+----------------------------------------------------------------------------------------------
+# DATA CLEANING
+6. select * from tns where amount <= 0
+7. update tns
+set merchant = NULL
+where merchant  = "Unknown"
+8. update tns
+set txn_date = str_to_date(txn_date, '%Y-%m-%d')
+9. select txn_id, count(*) as cnts
+from tns
+group by txn_id
+having count(*) > 1
+10. select * from tns
+where location is null
+----------------------------------------------------------------------------------------------
+11. select *, case
+when amount > 50000 and merchant = 'Unknown' then 1 else 0 end
+as flag from tns
+12. select * from tns
+where location = 'Unknown' AND is_fraud = 0
+13. select * from tns 
+where payment_mode not in ('Card','UPI','NetBanking')
+14. select * from tns
+where flag = 1 and is_fraud  = 0
+----------------------------------------------------------------------------------------------
+16. select payment_mode,
+count(case when is_fraud = 1 then 1 end)*100.0 / count(*) as fraud_rate
+from tns
+group by payment_mode
+
+17. select user_id, sum(is_fraud) as fraud_count
+from tns
+group by user_id
+order by fraud_count desc
+limit 10
+
+18.SELECT merchant, tns_amount,
+       DENSE_RANK() OVER (ORDER BY tns_amount DESC) AS rn
+from(
+select merchant, sum(amount) as tns_amount, 
+dense_rank() over (partition by merchant order by sum(amount) desc) as rn
+from tns
+group by merchant) t
+
+19. select user_id, txn_date, count(*) as tns_count
+from tns
+group by user_id, txn_date
+having count(*) > 3
+
+
+

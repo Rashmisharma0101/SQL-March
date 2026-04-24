@@ -1,0 +1,130 @@
+-- Find total number of orders.
+select count(*) from orders
+
+-- Get total quantity sold per product.
+select product_id, sum(quantity) as total_sold
+from orders
+group by product_id
+
+-- Find average delivery time
+select avg(delivery_time) as avg_del_time from orders
+
+-- List all distinct categories.
+select dictinct category from orders
+
+-- Find top 5 products by quantity sold
+select product_id, sum(quantity) as total_sold
+from orders
+group by product_id
+order by total_sold desc
+limit 5
+
+-- Count number of clinics
+select count(distinct clinic_id) as clinic_count from clients
+
+-- Total revenue per product
+select products.product_id, sum(orders.quantity * products.selling_price) as revenue
+from orders join products
+on orders.product_id = products.product_id
+group by products.product_id
+
+-- Find average order quantity per clinic
+select clinic_id, avg(quantity) as avg_quantity
+from orders
+group by clinic_id
+
+-- Get orders with delivery time > average delivery time
+select order_id, delivery_time from orders where delivery_time > (select avg(delivery_time) as avg_del_time
+from orders)
+
+-- Find city-wise total orders
+select clients.city, count(orders.order_id) as total_orders
+from orders join clients
+on orders.clinic_id = clients.clinic_id
+group by clients.city
+
+-- Find products with stock issues
+select product_id,
+sum(case when stock_issue = "Stockout" then 1 else 0 end) as total_stockout
+from orders
+group by product_id
+
+-- Find top 3 cities by revenue
+select clients.city, sum(orders.quantity * products.selling_price) as revenue
+from orders join products
+on orders.product_id = products.product_id
+join clients
+on clients.clinic_id = orders.clinic_id
+group by clients.city
+order by revenue desc
+limit 3
+
+-- Find average delivery time per state
+select clients.state, avg(orders.delivery_time) as avg_del_time
+from clients join orders
+on clients.clinic_id = orders.clinic_id
+group by clients.state
+
+-- Find clinics with highest avg patients per day
+select clinic_id, avg_patients_per_day from clients
+order by avg_patients_per_day desc
+limit 5
+
+-- Rank products by revenue
+with cte1 as (select products.product_id, sum(orders.quantity * products.selling_price) as revenue
+from orders join products
+on orders.product_id = products.product_id
+group by products.product_id)
+Select product_id, revenue, dense_rank() over (order by revenue desc) a rn
+from cte1
+
+-- Running total of revenue over time
+with cte1 as (select orders.order_date, (orders.quantity * products.selling_price) as revenue
+from orders join products
+on orders.product_id = products.product_id)
+select order_date, revenue, sum(revenue) over (order by order_date) as running_total
+from cte1
+
+-- Find repeat clinics (clinics with more than 1 order)
+select clinic_id, count(order_id) as cnts
+from orders
+group by clinic_id
+having count(order_id) > 1
+
+-- Find delivery performance category
+select order_id, case
+when delivery_time  <= 2 then 'fast'
+when delivery_time <= 5 then 'Medium'
+else 'Slow'
+end as delivery_category
+from orders
+
+-- Find most profitable product
+select orders.product_name,
+sum(orders.quantity*(products.selling_price - products.cost_price)) as profit
+from orders join products
+on orders.product_id = products.product_id
+group by orders.product_name
+order by profit desc
+limit 5
+
+-- Find clinics contributing to 80% of revenue (Pareto analysis)
+with cte1 as (select clinic_id, sum(orders.quantity * products.selling_price) as revenue
+from orders
+join
+products
+on orders.product_id = products.product_id
+group by orders.clinic_id),
+cte2 as (select *, sum(revenue) over (order by revenue desc) as running_revenue,
+sum(revenue) over () as overall_revenue
+from cte1)
+select * from cte2 where running_revenue <= 0.8 * overall_revenue
+
+
+
+
+
+
+
+
+

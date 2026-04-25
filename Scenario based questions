@@ -1,0 +1,23 @@
+-- Duplicate records in a table
+select id, count(*) as cnts
+from employee
+group by id
+having count(*) > 1
+
+-- Second Highest salary from employee table
+select max(sal) from employee where salary < (select max(salary) from employee)
+
+-- find employees without department
+select employees.empid, department.dept from employees left join department
+on employees.deptid = department.deptid
+where department.deptid is null
+
+-- Total Revenue Per Product
+select productid, sum(quantity*price) as revenue
+from orders
+group by productid
+
+-- Top 3 Highest-Paid Employees
+select empid, salary from employees
+order by salary desc
+limit 3
